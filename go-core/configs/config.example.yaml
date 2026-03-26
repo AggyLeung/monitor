@@ -1,0 +1,14 @@
+http:
+  addr: ":8080"
+auth:
+  jwt_secret: "replace-me"
+postgres:
+  dsn: "host=postgres user=postgres password=postgres dbname=cmdb port=5432 sslmode=disable"
+redis:
+  addr: "redis:6379"
+  password: ""
+  stream: "cmdb_tasks"
+neo4j:
+  uri: "neo4j://neo4j:7687"
+  user: "neo4j"
+  password: "password"

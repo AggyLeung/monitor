@@ -1,0 +1,7 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+requests==2.32.3
+boto3==1.35.18
+paramiko==3.4.1
+netmiko==4.4.0
+redis==5.0.8
