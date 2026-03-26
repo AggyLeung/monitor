@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Alert",
+  "type": "object",
+  "required": ["alert_id", "metric_name", "severity", "observed_value", "threshold", "timestamp"],
+  "properties": {
+    "alert_id": { "type": "string" },
+    "metric_name": { "type": "string" },
+    "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "observed_value": { "type": "number" },
+    "threshold": { "type": "number" },
+    "device_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "tags": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

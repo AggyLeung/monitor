@@ -1,0 +1,44 @@
+services:
+  collector-gateway:
+    build: ./services/collector-gateway
+    container_name: collector-gateway
+    environment:
+      - DETECTION_ENGINE_URL=http://detection-engine:8002
+    ports:
+      - "8001:8001"
+    depends_on:
+      - detection-engine
+
+  detection-engine:
+    build: ./services/detection-engine
+    container_name: detection-engine
+    environment:
+      - INCIDENT_CENTER_URL=http://incident-center:8003
+    ports:
+      - "8002:8002"
+    depends_on:
+      - incident-center
+
+  incident-center:
+    build: ./services/incident-center
+    container_name: incident-center
+    environment:
+      - REMEDIATION_URL=http://auto-remediation-runner:8004
+      - VERIFICATION_URL=http://verification-service:8005
+    ports:
+      - "8003:8003"
+    depends_on:
+      - auto-remediation-runner
+      - verification-service
+
+  auto-remediation-runner:
+    build: ./services/auto-remediation-runner
+    container_name: auto-remediation-runner
+    ports:
+      - "8004:8004"
+
+  verification-service:
+    build: ./services/verification-service
+    container_name: verification-service
+    ports:
+      - "8005:8005"
