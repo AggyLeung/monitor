@@ -6,13 +6,12 @@ import (
 	"os"
 
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
-	"gorm.io/driver/postgres"
+	postgresdriver "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"github.com/example/go-core/internal/api"
 	"github.com/example/go-core/internal/api/handler"
-	"github.com/example/go-core/internal/model"
 	neo4jrepo "github.com/example/go-core/internal/repository/neo4j"
-	"github.com/example/go-core/internal/repository/postgres"
+	pgrepo "github.com/example/go-core/internal/repository/postgres"
 	"github.com/example/go-core/internal/service"
 	"github.com/example/go-core/internal/pkg/auth"
 	"github.com/example/go-core/internal/pkg/mq"
@@ -36,23 +35,11 @@ func main() {
 	neo4jUser := env("NEO4J_USER", "neo4j")
 	neo4jPwd := env("NEO4J_PASSWORD", "password")
 
-	db, err := gorm.Open(postgres.Open(pgDSN), &gorm.Config{})
+	db, err := gorm.Open(postgresdriver.Open(pgDSN), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("postgres connect failed: %v", err)
 	}
-	if err := db.AutoMigrate(
-		&model.CIType{},
-		&model.CITypeAttribute{},
-		&model.CI{},
-		&model.CIAttributeValue{},
-		&model.Relation{},
-		&model.AuditLog{},
-		&model.SyncTask{},
-		&model.GraphSyncFailed{},
-		&model.User{},
-	); err != nil {
-		log.Fatalf("postgres migrate failed: %v", err)
-	}
+	// PostgreSQL schema is managed by SQL migrations in go-core/migrations.
 
 	driver, err := neo4j.NewDriverWithContext(neo4jURI, neo4j.BasicAuth(neo4jUser, neo4jPwd, ""))
 	if err != nil {
@@ -62,11 +49,11 @@ func main() {
 	_ = neo4jrepo.New(driver)
 
 	enforcer := auth.InitCasbin(db)
-	ciSvc := service.NewCIService(postgres.NewCIRepository(db))
-	relSvc := service.NewRelationService(postgres.NewRelationRepository(db))
+	ciSvc := service.NewCIService(pgrepo.NewCIRepository(db))
+	relSvc := service.NewRelationService(pgrepo.NewRelationRepository(db))
 	topoSvc := service.NewTopologyService(driver)
 	taskSvc := service.NewTaskService(mq.NewTaskPublisher(redisAddr, redisPwd, redisStream, 0))
-	graphSyncSvc := service.NewGraphSyncService(postgres.NewGraphSyncFailedRepository(db))
+	graphSyncSvc := service.NewGraphSyncService(pgrepo.NewGraphSyncFailedRepository(db))
 
 	h := api.Handlers{
 		CI:       handler.NewCIHandler(ciSvc),
